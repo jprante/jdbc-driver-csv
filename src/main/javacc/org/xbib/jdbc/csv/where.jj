@@ -1,0 +1,1124 @@
+/**
+ *  CsvJdbc - a JDBC driver for CSV files
+ *  Copyright (C) 2008  Mario Frasca
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+options
+{
+	STATIC = false;
+	LOOKAHEAD = 2;
+	FORCE_LA_CHECK = true;
+	IGNORE_CASE = true;
+	JDK_VERSION = "1.7";
+}
+PARSER_BEGIN(ExpressionParser)
+package org.xbib.jdbc.csv;
+
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.math.BigInteger;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.LinkedList;
+
+public class ExpressionParser
+{
+	private ParsedExpression content;
+	private Date currentDate;
+	private Time currentTime;
+
+	public void parseLogicalExpression()throws ParseException
+	{
+		content = logicalExpression();
+	}
+	public void parseGroupByEntry()throws ParseException
+	{
+		content = groupByEntry();
+	}
+	public void parseOrderByEntry()throws ParseException
+	{
+		content = orderByEntry();
+	}
+	public void parseQueryEnvEntry()throws ParseException
+	{
+		content = queryEnvEntry();
+	}
+	public ParsedStatement parseSingleStatement()throws ParseException
+	{
+		/* Reset prepared statement place-holder counter */
+		Placeholder.nextIndex = 1;
+		ParsedStatement parsedStatement = singleStatement();
+		return parsedStatement;
+	}
+	public List<ParsedStatement> parseMultipleStatements()throws ParseException
+	{
+		/* Reset prepared statement place-holder counter */
+		Placeholder.nextIndex = 1;
+		List<ParsedStatement> statements = multipleStatements();
+		return statements;
+	}
+	public Object eval(Map<String, Object> env) throws SQLException
+	{
+		return content.eval(env);
+	}
+	public String toString()
+	{
+		return ""+content;
+	}
+	public Date getCurrentDate()
+	{
+		if (currentDate == null)
+		{
+			long l = System.currentTimeMillis();
+			currentDate = new Date(l);
+			currentTime = new Time(l);
+			/* Remove any time component from the date */
+			currentDate = Date.valueOf(currentDate.toString());
+		}
+		return currentDate;
+	}
+	public Time getCurrentTime()
+	{
+		if (currentTime == null)
+		{
+			long l = System.currentTimeMillis();
+			currentDate = new Date(l);
+			currentTime = new Time(l);
+			/* Remove any time component from the date */
+			currentDate = Date.valueOf(currentDate.toString());
+		}
+		return currentTime;
+	}
+}
+PARSER_END(ExpressionParser)
+SKIP:
+{
+	" "
+	| "\t"
+	| "\r"
+	| "\n"
+}
+SKIP:
+{
+	<"/*">: IN_C_COMMENT
+}
+<IN_C_COMMENT> SKIP:
+{
+	<"*/">: DEFAULT
+	| <~[]>
+}
+SPECIAL_TOKEN:
+{
+	/*
+	 * Skip "--" single-line comments in SQL statement.  A space is required
+	 * after "--" so that expression "i--1" is not interpreted as a comment.
+	 */
+	<SINGLELINECOMMENT: "--"([" ", "\t"])+ (~["\r", "\n"])* ("\n"|"\r"|"\r\n")?
+		| "--"("\n"|"\r"|"\r\n")>
+}
+TOKEN:
+{
+	<SELECT:"SELECT">
+}
+TOKEN:
+{
+	<DISTINCT:"DISTINCT">
+}
+TOKEN:
+{
+	<COMMA:",">
+}
+TOKEN:
+{
+	<#DOT:".">
+}
+TOKEN:
+{
+	<UNSIGNEDINT:<DIGITS>>
+}
+TOKEN:
+{
+	<UNSIGNEDNUMBER:<DIGITS> (<EXPONENT>)?
+		| <DIGITS><DOT><DIGITS> (<EXPONENT>)?
+		| <DOT><DIGITS> (<EXPONENT>)?
+		| <DIGITS><DOT> (<EXPONENT>)?
+		| <DIGITS><TYPESUFFIX> >
+}
+TOKEN:
+{
+	<#DIGITS:(["0"-"9"])+>
+}
+TOKEN:
+{
+	<#EXPONENT: ["e","E"] (["+","-"])? <DIGITS>>
+}
+TOKEN:
+{
+	<#TYPESUFFIX:"L">
+}
+TOKEN:
+{
+	<NULL:"NULL">
+}
+TOKEN:
+{
+	<CURRENT_DATE:"CURRENT_DATE">
+}
+TOKEN:
+{
+	<CURRENT_TIME:"CURRENT_TIME">
+}
+TOKEN:
+{
+	<AND:"AND">
+}
+TOKEN:
+{
+	<OR:"OR">
+}
+TOKEN:
+{
+	<NOT:"NOT">
+}
+TOKEN:
+{
+	<IS:"IS">
+}
+TOKEN:
+{
+	<AS:"AS">
+}
+TOKEN:
+{
+	<LIKE:"LIKE">
+}
+TOKEN:
+{
+	<ESCAPE:"ESCAPE">
+}
+TOKEN:
+{
+	<BETWEEN:"BETWEEN">
+}
+TOKEN:
+{
+	<IN:"IN">
+}
+TOKEN:
+{
+	<CASE:"CASE">
+}
+TOKEN:
+{
+	<WHEN:"WHEN">
+}
+TOKEN:
+{
+	<THEN:"THEN">
+}
+TOKEN:
+{
+	<ELSE:"ELSE">
+}
+TOKEN:
+{
+	<END:"END">
+}
+TOKEN:
+{
+	<PLACEHOLDER:"?">
+}
+TOKEN:
+{
+	<ASC:"ASC">
+}
+TOKEN:
+{
+	<DESC:"DESC">
+}
+TOKEN:
+{
+	<DAYOFMONTH:"DAYOFMONTH">
+}
+TOKEN:
+{
+	<MONTH:"MONTH">
+}
+TOKEN:
+{
+	<YEAR:"YEAR">
+}
+TOKEN:
+{
+	<HOUROFDAY:"HOUROFDAY">
+}
+TOKEN:
+{
+	<MINUTE:"MINUTE">
+}
+TOKEN:
+{
+	<SECOND:"SECOND">
+}
+TOKEN:
+{
+	<LOWER:"LOWER">
+}
+TOKEN:
+{
+	<ROUND:"ROUND">
+}
+TOKEN:
+{
+	<UPPER:"UPPER">
+}
+TOKEN:
+{
+	<TRIM:"TRIM">
+}
+TOKEN:
+{
+	<LTRIM:"LTRIM">
+}
+TOKEN:
+{
+	<RTRIM:"RTRIM">
+}
+TOKEN:
+{
+	<SUBSTRING:"SUBSTRING">
+}
+TOKEN:
+{
+	<LENGTH:"LENGTH">
+}
+TOKEN:
+{
+	<NULLIF:"NULLIF">
+}
+TOKEN:
+{
+	<COALESCE:"COALESCE">
+}
+TOKEN:
+{
+	<COUNT:"COUNT">
+}
+TOKEN:
+{
+	<MAX:"MAX">
+}
+TOKEN:
+{
+	<MIN:"MIN">
+}
+TOKEN:
+{
+	<SUM:"SUM">
+}
+TOKEN:
+{
+	<AVG:"AVG">
+}
+TOKEN:
+{
+	/*
+	 * Change to IN_TABLE state after parsing "FROM" keyword.
+	 */
+	<FROM:"FROM"> : IN_TABLE
+}
+TOKEN:
+{
+	<LEFT:"LEFT">
+}
+TOKEN:
+{
+	<RIGHT:"RIGHT">
+}
+TOKEN:
+{
+	<FULL:"FULL">
+}
+TOKEN:
+{
+	<INNER:"INNER">
+}
+TOKEN:
+{
+	<OUTER:"OUTER">
+}
+TOKEN:
+{
+	<JOIN:"JOIN">
+}
+TOKEN:
+{
+	<ON:"ON">
+}
+TOKEN:
+{
+	<CROSS:"CROSS">
+}
+TOKEN:
+{
+	<WHERE:"WHERE">
+}
+TOKEN:
+{
+	<GROUP:"GROUP">
+}
+TOKEN:
+{
+	<ORDER:"ORDER">
+}
+TOKEN:
+{
+	<BY:"BY">
+}
+TOKEN:
+{
+	<HAVING:"HAVING">
+}
+TOKEN:
+{
+	<LIMIT:"LIMIT">
+}
+TOKEN:
+{
+	<OFFSET:"OFFSET">
+}
+TOKEN:
+{
+	/*
+	 * Allow double quoted names and double quoted "tableName"."columnName"
+	 * or "tableName".columnName
+	 */
+	<NAME:(["0"-"9", "A"-"Z", "a"-"z", "_", "."])+
+		| "\""(~["\""])*"\"" (<DOT> "\""(~["\""])*"\"")?
+		| "\""(~["\""])*"\"" (<DOT> (["0"-"9", "A"-"Z", "a"-"z", "_", "."])+)? >
+}
+TOKEN:
+{
+	<STRING:"'"(~["'"])*"'">
+}
+TOKEN:
+{
+	<GREATERTHAN:">">
+}
+TOKEN:
+{
+	<LESSTHAN:"<">
+}
+TOKEN:
+{
+	<GREATERTHANEQUALS:">=">
+}
+TOKEN:
+{
+	<LESSTHANEQUALS:"<=">
+}
+TOKEN:
+{
+	<NOTEQUALS:("<>" | "!=")>
+}
+TOKEN:
+{
+	<EQUALS:"=">
+}
+TOKEN:
+{
+	<ASTERISK:"*">
+}
+TOKEN:
+{
+	<NAMEASTERISK:<NAME>".*">
+}
+TOKEN:
+{
+	<MINUS:"-">
+}
+TOKEN:
+{
+	<PLUS:"+">
+}
+TOKEN:
+{
+	<DIVIDE:"/">
+}
+TOKEN:
+{
+	<MODULO:"%">
+}
+TOKEN:
+{
+	<CONCAT:"||">
+}
+TOKEN:
+{
+	<OPENPARENTHESIS:"(">
+}
+TOKEN:
+{
+	<CLOSEPARENTHESIS:")">
+}
+TOKEN:
+{
+	<SEMICOLON:";">
+}
+<IN_TABLE> SKIP:
+{
+	" "
+	| "\t"
+	| "\r"
+	| "\n"
+}
+/*
+ * Tablename is a sequence of non-whitespace or double-quoted
+ * string when in IN_TABLE state.
+ * Switch back to DEFAULT state after parsing table name.
+ *
+ * Do not allow ")" in tablename so subqueries like "(SELECT x FROM t)" are
+ * accepted.
+ */
+<IN_TABLE> TOKEN:
+{
+	<TABLENAME:(~[" ", "\t", "\r", "\n", ";", ",", ")"])+> : DEFAULT
+}
+<IN_TABLE> TOKEN:
+{
+	<QUOTEDTABLENAME:"\""(~["\""])+"\""> : DEFAULT
+}
+/*
+ * See http://www.engr.mun.ca/~theo/JavaCC-FAQ/javacc-faq-moz.htm
+ * 3.19  How do I throw a ParseException instead of a TokenMgrError?
+ */
+<*> TOKEN:
+{
+	<UNEXPECTED_CHAR: ~[]>
+}
+ParsedExpression logicalExpression():
+{
+	Expression left;
+}
+{
+	left = logicalOrExpression()
+	{
+		return new ParsedExpression(left);
+	}
+}
+ParsedTable firstTableEntry():
+{
+	String tableName;
+	String tableAlias = null;
+	Token t;
+}
+{
+	(t=<QUOTEDTABLENAME>|t=<TABLENAME>){tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?
+	{
+		return new ParsedTable(tableName, tableAlias);
+	}
+}
+LogicalExpression onEntry():
+{
+	Expression left, right;
+	String op;
+	Token t;
+}
+{
+	/*
+	 * A JOIN B ON A.ID = B.ID must have an equality comparison.
+	 */
+	left = binaryOperation()t=<EQUALS>{op = t.image;}right = binaryOperation()
+	{
+		return new RelopExpression(op, left, right);
+	}
+}
+ParsedTable joinedTableEntry():
+{
+	String tableName;
+	String tableAlias = null;
+	LogicalExpression joinClause;
+	Token t;
+}
+{
+	(<COMMA>|(<CROSS><JOIN>))t=<NAME>{tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?
+	{
+		return new ParsedTable(JoinType.CROSS, null, tableName, tableAlias);
+	}
+	| (<INNER>)?<JOIN>t=<NAME>{tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?<ON>joinClause = onEntry()
+	{
+		return new ParsedTable(JoinType.INNER, joinClause, tableName, tableAlias);
+	}
+	| <LEFT>(<OUTER>)?<JOIN>t=<NAME>{tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?<ON>joinClause = onEntry()
+	{
+		return new ParsedTable(JoinType.LEFT_OUTER, joinClause, tableName, tableAlias);
+	}
+	| <RIGHT>(<OUTER>)?<JOIN>t=<NAME>{tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?<ON>joinClause = onEntry()
+	{
+		return new ParsedTable(JoinType.RIGHT_OUTER, joinClause, tableName, tableAlias);
+	}
+	| <FULL>(<OUTER>)?<JOIN>t=<NAME>{tableName = StringConverter.removeQuotes(t.image);}((<AS>)?t=<NAME>{tableAlias = StringConverter.removeQuotes(t.image).toUpperCase();})?<ON>joinClause = onEntry()
+	{
+		return new ParsedTable(JoinType.FULL_OUTER, joinClause, tableName, tableAlias);
+	}
+}
+ParsedExpression groupByEntry():
+{
+  Expression left;
+}
+{
+	left = binaryOperation()
+	{
+		return new ParsedExpression(left);
+	}
+}
+ParsedExpression orderByEntry():
+{
+	Expression left;
+	String order = "ASC";
+	Token t;
+}
+{
+	left = binaryOperation()(t=<ASC>{order=t.image;}|t=<DESC>{order=t.image;})?
+	{
+		return new ParsedExpression(new OrderByEntry(left, order));
+	}
+}
+List<ParsedStatement> multipleStatements():
+{
+	List<ParsedStatement> statements = new LinkedList<ParsedStatement>();
+	ParsedStatement parsedStatement;
+}
+{
+	parsedStatement = selectStatement(){statements.add(parsedStatement);}
+	(<SEMICOLON>(parsedStatement = selectStatement(){statements.add(parsedStatement);})?)*<EOF>
+	{
+		return statements;
+	}
+}
+ParsedStatement singleStatement():
+{
+	ParsedStatement parsedStatement;
+}
+{
+	parsedStatement = selectStatement()(<SEMICOLON>)?<EOF>
+	{
+		return parsedStatement;
+	}
+}
+ParsedStatement selectStatement():
+{
+	List<ParsedExpression> result = new LinkedList<ParsedExpression>();
+	ParsedExpression expr;
+	boolean isDistinct = false;
+	ParsedTable tableEntry;
+	ParsedTable joinedTableEntry;
+	List<ParsedTable> tableEntries = new LinkedList<ParsedTable>();
+	ParsedExpression whereClause = null;
+	ParsedExpression entry;
+	List<ParsedExpression> groupByEntries = new LinkedList<ParsedExpression>();
+	ParsedExpression havingClause = null;
+	List<ParsedExpression> orderByEntries = new LinkedList<ParsedExpression>();
+	int limit = -1;
+	int offset = 0;
+	Token t;
+}
+{
+	<SELECT>
+	(<DISTINCT>{isDistinct = true;})?
+	expr = queryEnvEntry(){result.add(expr);}(<COMMA>expr = queryEnvEntry(){result.add(expr);})*
+	(
+		<FROM>tableEntry = firstTableEntry(){tableEntries.add(tableEntry);}
+		(joinedTableEntry = joinedTableEntry(){tableEntries.add(joinedTableEntry);})*
+		(<WHERE>whereClause = logicalExpression())?
+		(<GROUP><BY>entry = groupByEntry(){groupByEntries.add(entry);}(<COMMA>entry = groupByEntry(){groupByEntries.add(entry);})*(<HAVING>havingClause = logicalExpression())?)?
+		(<ORDER><BY>entry = orderByEntry(){orderByEntries.add(entry);}(<COMMA>entry = orderByEntry(){orderByEntries.add(entry);})*)?
+		(<LIMIT>t=<UNSIGNEDINT>{limit = Integer.parseInt(t.image);}(<OFFSET>t=<UNSIGNEDINT>{offset = Integer.parseInt(t.image);})?)?
+	)?
+	{
+		return new ParsedStatement(result, isDistinct, tableEntries, whereClause, groupByEntries, havingClause, orderByEntries, limit, offset);
+	}
+}
+ParsedExpression queryEnvEntry():
+{
+	Expression expression, result, asterisk;
+	Expression alias = null;
+	Token t;
+}
+{
+	(expression = binaryOperation()((<AS>)?alias = columnAlias())?
+	{
+		if (alias != null)
+			result = new QueryEnvEntry(((ColumnName)alias).columnName, expression);
+		else if (expression instanceof ColumnName)
+			result = new QueryEnvEntry(((ColumnName)expression).columnName, expression);
+		else
+			result = new QueryEnvEntry(expression.toString(), expression);
+		return new ParsedExpression(result);
+	}
+	)
+	| (t=<ASTERISK>|t=<NAMEASTERISK>)
+	{
+		asterisk = new AsteriskExpression(t.image);
+		return new ParsedExpression(new QueryEnvEntry(t.image, asterisk));
+	}
+}
+Expression logicalOrExpression():
+{
+	Expression left, right;
+}
+{
+	left = logicalAndExpression()(<OR>right = logicalAndExpression()
+	{
+		left = new OrExpression(left, right);
+	}
+	)*
+	{
+		return left;
+	}
+}
+Expression logicalAndExpression():
+{
+	Expression left, right;
+}
+{
+	left = logicalUnaryExpression()(<AND>right = logicalUnaryExpression()
+	{
+		left = new AndExpression(left, right);
+	}
+	)*
+	{
+		return left;
+	}
+}
+Expression logicalUnaryExpression():
+{
+	Expression arg;
+}
+{
+	<NOT>arg = logicalUnaryExpression()
+	{
+		return new NotExpression(arg);
+	}
+	| arg = relationalExpression()
+	{
+		return arg;
+	}
+}
+Expression relationalExpression():
+{
+	Expression arg1, arg2;
+	Expression arg3 = null;
+	LogicalExpression expr;
+	String op;
+	boolean negate = false;
+	List<Expression> inEntries = new LinkedList<Expression>();
+}
+{
+	arg1 = binaryOperation()(op = relOp()arg2 = binaryOperation()
+	{
+		arg1 = new RelopExpression(op, arg1, arg2);
+	}
+	| (<NOT>{negate=true;})?(<BETWEEN>arg2 = binaryOperation()<AND>arg3 = binaryOperation()
+	{
+		expr = new BetweenExpression(arg1, arg2, arg3);
+		if (negate)
+			expr = new NotExpression(expr);
+		arg1 = expr;
+	}
+	| <LIKE>arg2 = binaryOperation()(<ESCAPE>arg3 = binaryOperation())?
+	{
+		expr = new LikeExpression(arg1, arg2, arg3);
+		if (negate)
+			expr = new NotExpression(expr);
+		arg1 = expr;
+	}
+	| <IN><OPENPARENTHESIS>arg2 = binaryOperation(){inEntries.add(arg2);}(<COMMA>arg2 = binaryOperation(){inEntries.add(arg2);})*<CLOSEPARENTHESIS>
+	{
+		expr = new InExpression(arg1, inEntries);
+		if (negate)
+			expr = new NotExpression(expr);
+		arg1 = expr;
+	}
+	)
+	| <IS>(<NOT>{negate=true;})?<NULL>
+	{
+		expr = new IsNullExpression(arg1);
+		if (negate)
+			expr = new NotExpression(expr);
+		arg1 = expr;
+	}
+	)?
+	{
+		return arg1;
+	}
+}
+String relOp():
+{
+	Token t;
+}
+{
+	(t=<GREATERTHAN>|t=<LESSTHAN>|t=<GREATERTHANEQUALS>|t=<LESSTHANEQUALS>|t=<NOTEQUALS>|t=<EQUALS>)
+	{
+		return new String(t.image);
+	}
+}
+String binAddOp():
+{
+	Token t;
+}
+{
+	(t = <PLUS>|t=<MINUS>|t=<CONCAT>)
+	{
+		return t.image;
+	}
+}
+String binMultiplyOp():
+{
+	Token t;
+}
+{
+	(t = <ASTERISK>|t=<DIVIDE>|t=<MODULO>)
+	{
+		return t.image;
+	}
+}
+Expression countOperation():
+{
+	Expression arg;
+	Token t;
+}
+{
+	(t=<ASTERISK>)
+	{
+		return new AsteriskExpression(t.image);
+	}
+	| arg = binaryOperation()
+	{
+		return arg;
+	}
+}
+Expression binaryOperation():
+{
+	Expression left, right;
+	String op;
+}
+{
+	left = multiplyOperation()(op = binAddOp()right = multiplyOperation()
+	{
+		left = new BinaryOperation(op, left, right);
+	}
+	)*
+	{
+		return left;
+	}
+}
+Expression multiplyOperation():
+{
+	Expression left, right;
+	String op;
+}
+{
+	left = simpleExpression()(op = binMultiplyOp()right = simpleExpression()
+	{
+		left = new BinaryOperation(op, left, right);
+	}
+	)*
+	{
+		return left;
+	}
+}
+Expression simpleExpression():
+{
+	List<Expression> args = new LinkedList<Expression>();
+	Expression arg;
+	Expression arg2 = null;
+	Expression arg3 = null;
+	boolean isDistinct;
+	ParsedStatement parsedStatement;
+	Token t;
+}
+{
+	<OPENPARENTHESIS> parsedStatement = selectStatement() <CLOSEPARENTHESIS>
+	{
+		return new SubQueryExpression(parsedStatement);
+	}
+	| <OPENPARENTHESIS> arg = logicalOrExpression() <CLOSEPARENTHESIS>
+	{
+		return arg;
+	}
+	| <UPPER> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLUpperFunction(arg);
+	}
+	| <LOWER> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLLowerFunction(arg);
+	}
+	| <TRIM> <OPENPARENTHESIS> arg = binaryOperation() (<COMMA>
+		arg2 = binaryOperation())? <CLOSEPARENTHESIS>
+	{
+		return new SQLTrimFunction(arg, arg2, SQLTrimFunction.Type.BOTH);
+	}
+	| <LTRIM> <OPENPARENTHESIS> arg = binaryOperation() (<COMMA>
+		arg2 = binaryOperation())? <CLOSEPARENTHESIS>
+	{
+		return new SQLTrimFunction(arg, arg2, SQLTrimFunction.Type.LEADING);
+	}
+	| <RTRIM> <OPENPARENTHESIS> arg = binaryOperation() (<COMMA>
+		arg2 = binaryOperation())? <CLOSEPARENTHESIS>
+	{
+		return new SQLTrimFunction(arg, arg2, SQLTrimFunction.Type.TRAILING);
+	}
+	| <SUBSTRING> <OPENPARENTHESIS> arg = binaryOperation()
+		<COMMA> arg2 = binaryOperation()
+		(<COMMA> arg3 = binaryOperation())? <CLOSEPARENTHESIS>
+	{
+		return new SQLSubstringFunction(arg, arg2, arg3);
+	}
+	| <LENGTH> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLLengthFunction(arg);
+	}
+	| <ROUND> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLRoundFunction(arg);
+	}
+	| <DAYOFMONTH> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLDayOfMonthFunction(arg);
+	}
+	| <MONTH> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLMonthFunction(arg);
+	}
+	| <YEAR> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLYearFunction(arg);
+	}
+	| <HOUROFDAY> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLHourOfDayFunction(arg);
+	}
+	| <MINUTE> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLMinuteFunction(arg);
+	}
+	| <SECOND> <OPENPARENTHESIS> arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLSecondFunction(arg);
+	}
+	| <NULLIF> <OPENPARENTHESIS> arg = binaryOperation() <COMMA>
+		arg2 = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLNullIfFunction(arg, arg2);
+	}
+	| <COALESCE> <OPENPARENTHESIS> arg = binaryOperation(){args.add(arg);}
+		(<COMMA> arg = binaryOperation(){args.add(arg);})* <CLOSEPARENTHESIS>
+	{
+		return new SQLCoalesceFunction(args);
+	}
+	| <COUNT> <OPENPARENTHESIS>{isDistinct = false;}
+		(<DISTINCT>{isDistinct = true;})?
+		arg = countOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLCountFunction(isDistinct, arg);
+	}
+	| <MAX> <OPENPARENTHESIS>{isDistinct = false;}
+		(<DISTINCT>{isDistinct = true;})?
+		arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLMaxFunction(isDistinct, arg);
+	}
+	| <MIN> <OPENPARENTHESIS>{isDistinct = false;}
+		(<DISTINCT>{isDistinct = true;})?
+		arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLMinFunction(isDistinct, arg);
+	}
+	| <SUM> <OPENPARENTHESIS>{isDistinct = false;}
+		(<DISTINCT>{isDistinct = true;})?
+		arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLSumFunction(isDistinct, arg);
+	}
+	| <AVG> <OPENPARENTHESIS>{isDistinct = false;}
+		(<DISTINCT>{isDistinct = true;})?
+		arg = binaryOperation() <CLOSEPARENTHESIS>
+	{
+		return new SQLAvgFunction(isDistinct, arg);
+	}
+	| t=<NAME> <OPENPARENTHESIS> (arg = binaryOperation(){args.add(arg);}
+		(<COMMA> arg = binaryOperation(){args.add(arg);})*)? <CLOSEPARENTHESIS>
+	{
+		return new SQLUserFunction(t.image, args);
+	}
+	| arg = searchedCaseExpression()
+	{
+		return arg;
+	}
+	| arg = simpleCaseExpression()
+	{
+		return arg;
+	}
+	| arg = columnName()
+	{
+		return arg;
+	}
+	| arg = numericConstant()
+	{
+		return arg;
+	}
+	| arg = stringConstant()
+	{
+		return arg;
+	}
+	| <NULL>
+	{
+		return new NullConstant();
+	}
+	| <CURRENT_DATE>
+	{
+		return new CurrentDateConstant(this);
+	}
+	| <CURRENT_TIME>
+	{
+		return new CurrentTimeConstant(this);
+	}
+	| <PLACEHOLDER>
+	{
+		return new Placeholder();
+	}
+}
+Expression searchedCaseExpression():
+{
+	List<Expression> conditions = new LinkedList<Expression>();
+	List<Expression> values = new LinkedList<Expression>();
+	Expression arg;
+	Expression arg2;
+	Expression arg3 = null;
+}
+{
+	<CASE> (<WHEN> arg = logicalOrExpression(){conditions.add(arg);}
+	<THEN> arg2 = binaryOperation(){values.add(arg2);})*
+	(<ELSE> arg3 = binaryOperation())?
+	<END>
+	{
+		return new SearchedCaseExpression(conditions, values, arg3);
+	}
+}
+Expression simpleCaseExpression():
+{
+	List<Expression> switches = new LinkedList<Expression>();
+	List<Expression> values = new LinkedList<Expression>();
+	Expression arg;
+	Expression arg2;
+	Expression arg3;
+	Expression arg4 = null;
+}
+{
+	<CASE> arg = binaryOperation()
+	(<WHEN> arg2 = binaryOperation(){switches.add(arg2);}
+	<THEN> arg3 = binaryOperation(){values.add(arg3);})*
+	(<ELSE> arg4 = binaryOperation())?
+	<END>
+	{
+		return new SimpleCaseExpression(arg, switches, values, arg4);
+	}
+}
+Expression columnName():
+{
+	Token t;
+}
+{
+	(t=<NAME>|t=<DAYOFMONTH>|t=<MONTH>|t=<YEAR>|t=<HOUROFDAY>|t=<MINUTE>|t=<SECOND>|t=<LOWER>|t=<ROUND>|t=<UPPER>|t=<TRIM>|t=<LTRIM>|t=<RTRIM>|t=<SUBSTRING>|t=<LENGTH>|t=<NULLIF>|t=<COALESCE>|t=<AVG>|t=<COUNT>|t=<MAX>|t=<MIN>|t=<SUM>)
+	{
+		return new ColumnName(StringConverter.removeQuotes(t.image));
+	}
+}
+Expression numericConstant():
+{
+	Token t;
+	String sign = "";
+	String digits;
+	boolean isLong;
+}
+{
+	(t=<MINUS>{sign=t.image;})?
+	(t = <UNSIGNEDNUMBER>|t = <UNSIGNEDINT>)
+	{
+		Number value = null;
+		digits = sign+t.image;
+		isLong = false;
+		if (digits.toUpperCase().endsWith("L"))
+		{
+			digits = digits.substring(0, digits.length() - 1);
+			isLong = true;
+		}
+		try
+		{
+			value = new Long(digits);
+			if (isLong == false && value.longValue() >= Integer.MIN_VALUE && value.longValue() <= Integer.MAX_VALUE)
+				value = Integer.valueOf(value.intValue());
+		}
+		catch (NumberFormatException e)
+		{
+			value = new Double(digits);
+		}
+		return new NumericConstant(value);
+	}
+}
+Expression stringConstant():
+{
+	String left, right;
+}
+{
+	left = stringConstantAtom()(right = stringConstantAtom()
+	{
+		left = left+"'"+right;
+	}
+	)*
+	{
+		return new StringConstant(left);
+	}
+}
+String stringConstantAtom():
+{
+	Token t;
+}
+{
+	t = <STRING>
+	{
+		return t.image.substring(1, t.image.length()-1);
+	}
+}
+Expression columnAlias():
+{
+	Token t;
+}
+{
+	(t=<NAME>|t=<DAYOFMONTH>|t=<MONTH>|t=<YEAR>|t=<HOUROFDAY>|t=<MINUTE>|t=<SECOND>|t=<LOWER>|t=<ROUND>|t=<UPPER>|t=<TRIM>|t=<LTRIM>|t=<RTRIM>|t=<SUBSTRING>|t=<LENGTH>|t=<NULLIF>|t=<COALESCE>|t=<AVG>|t=<COUNT>|t=<MAX>|t=<MIN>|t=<SUM>)
+	{
+		return new ColumnName(StringConverter.removeQuotes(t.image));
+	}
+}

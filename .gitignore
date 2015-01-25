@@ -1,0 +1,14 @@
+/data
+/work
+/logs
+/.idea
+/target
+.DS_Store
+*.iml
+*.ipr
+*.iws
+/.settings
+/.classpath
+/.project
+/.gradle
+/build
