@@ -75,7 +75,8 @@ or other special characters.
 
 Additional functions are defined from java methods using the function.NAME driver property.
 
-| Aggregate Function	| Description|
+| Aggregate Function	| Description |
+|-----------------------|-------------|
 | AVG(N)	| Average of all values|
 | COUNT(N)	| Count of all values|
 | MAX(N)	| Maximum value|
@@ -324,8 +325,11 @@ If True, leading and trailing whitespace is trimmed from each column value in th
 Original authors are
 
 Jonathan Ackerman
+
 Mario Frasca
+
 Sander Brienen
+
 Simon Chenery
 
 # License
