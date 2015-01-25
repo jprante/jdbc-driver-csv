@@ -24,7 +24,7 @@ import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 public class CsvResources {
-    private static ResourceBundle messages = PropertyResourceBundle.getBundle("org.relique.jdbc.csv.messages", Locale.getDefault());
+    private static ResourceBundle messages = PropertyResourceBundle.getBundle("org.xbib.jdbc.csv.messages", Locale.getDefault());
 
     public static String getString(String key) {
         try {

@@ -83,7 +83,7 @@ public class CsvDriver implements Driver {
     public static final String TRANSPOSED_FIELDS_TO_SKIP = "transposedFieldsToSkip";
 
     public static final String CHARSET = "charset";
-    public final static String URL_PREFIX = "jdbc:relique:csv:";
+    public final static String URL_PREFIX = "jdbc:xbib:csv:";
     public static final String CRYPTO_FILTER_CLASS_NAME = "cryptoFilterClassName";
 
     public static final String TIME_ZONE_NAME = "timeZoneName";
