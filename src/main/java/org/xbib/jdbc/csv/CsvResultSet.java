@@ -415,7 +415,7 @@ public class CsvResultSet implements ResultSet {
                     Expression expr = (Expression) o[1];
                     List<String> exprUsedColumns = expr.usedColumns();
                     for (Object usedColumn : exprUsedColumns) {
-                        if (!allReaderColumns.contains(usedColumn)) {
+                        if (!allReaderColumns.contains(usedColumn.toString().toUpperCase())) {
                             throw new SQLException(CsvResources.getString("invalidColumnName") + ": " + usedColumn);
                         }
                     }
