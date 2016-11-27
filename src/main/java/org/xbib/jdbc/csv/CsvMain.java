@@ -20,7 +20,7 @@ public class CsvMain {
         int exitStatus = 0;
 
         try {
-            Class.forName("org.relique.jdbc.csv.CsvDriver");
+            Class.forName("org.xbib.jdbc.csv.CsvDriver");
 
             int argIndex = 0;
             if (argIndex + 1 < args.length && args[argIndex].equals("-p")) {

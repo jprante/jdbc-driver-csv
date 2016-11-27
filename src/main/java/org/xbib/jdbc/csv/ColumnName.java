@@ -11,11 +11,11 @@ class ColumnName extends Expression {
     String columnName;
 
     public ColumnName(String columnName) {
-        this.columnName = columnName.toUpperCase();
+        this.columnName = columnName;
     }
 
     public Object eval(Map<String, Object> env) {
-        return env.get(columnName);
+        return env.get(columnName.toUpperCase());
     }
 
     public String toString() {

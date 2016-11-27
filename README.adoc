@@ -22,6 +22,19 @@ not all JDBC functionality is available.
 
 This driver accepts all types of CSV files defined by RFC 4180.
 
+The URL syntax for the driver URL is as follows
+
+    jdbc:xbib:csv:<foldername>[?<property=value]",
+    
+File names are mapped to table names. By default, the extension `.csv` is assumed.
+Example:
+
+    "jdbc:xbib:csv:myDataFolder?quotechar=~",
+
+This will provide the content of the folder *myDataFolder* through the JDBC interface.
+
+## Queries
+
 This driver accepts only SQL SELECT queries from a single table and does not
 support INSERT, UPDATE, DELETE or CREATE statements. Joins between tables in
 SQL SELECT queries are not supported.
@@ -58,7 +71,7 @@ or other special characters.
 | SECOND(T)	| Extracts seconds value from time or timestamp T |
 | SUBSTRING(S, N [, L])	| Extracts substring from S starting at index N (counting from 1) with length L |
 | TRIM(S, [, T])	| Removes leading and trailing characters from S that occur in T |
-| UPPER(S)	| Converts string to lower case |
+| UPPER(S)	| Converts string to upper case |
 | YEAR(D)	| Extracts year from date or timestamp D |
 
 Additional functions are defined from java methods using the function.NAME driver property.
