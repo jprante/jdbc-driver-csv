@@ -1,22 +1,6 @@
-/*
- *	CsvJdbc - a JDBC driver for CSV files
- *	Copyright (C) 2001	Jonathan Ackerman
- *
- *	This library is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU Lesser General Public
- *	License as published by the Free Software Foundation; either
- *	version 2.1 of the License, or (at your option) any later version.
- *	This library is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *	Lesser General Public License for more details.
- *	You should have received a copy of the GNU Lesser General Public
- *	License along with this library; if not, write to the Free Software
- *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
 package org.xbib.jdbc.csv;
 
-import org.xbib.io.DataReader;
+import org.xbib.jdbc.io.DataReader;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -30,9 +14,7 @@ import java.util.Vector;
 /**
  * This class is a helper class that handles the reading and parsing of data
  * from a .csv file.
- *
  */
-
 public class CsvRawReader {
     private LineNumberReader input;
     private String tableAlias;
@@ -43,7 +25,7 @@ public class CsvRawReader {
     private String headerLine = "";
     private boolean suppressHeaders = false;
     private boolean isHeaderFixedWidth = true;
-    private Character quoteChar = Character.valueOf('"');
+    private Character quoteChar = '"';
     private boolean trimValues = true;
     private String comment = null;
     private boolean ignoreUnparseableLines;
@@ -60,8 +42,8 @@ public class CsvRawReader {
      * @param quoteChar            char
      * @param defectiveHeaders
      * @param skipLeadingDataLines
-     * @throws java.sql.SQLException
-     * @throws java.io.IOException
+     * @throws SQLException
+     * @throws IOException
      */
     public CsvRawReader(LineNumberReader in, String tableAlias, String separator,
                         boolean suppressHeaders, boolean isHeaderFixedWidth, Character quoteChar, String comment,

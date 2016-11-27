@@ -1,0 +1,7 @@
+ext {
+    user = 'jprante'
+    description = 'JDBC driver for CSV resources'
+    scmUrl = "https://github.com/${user}/${project.name}"
+    scmConnection = "scm:git:git://github.com/${user}/${project.name}.git"
+    scmDeveloperConnection = "scm:git:git://github.com/${user}/${project.name}.git"
+}

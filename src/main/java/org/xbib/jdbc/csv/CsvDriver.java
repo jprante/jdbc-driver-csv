@@ -1,22 +1,6 @@
-/*
- *  CsvJdbc - a JDBC driver for CSV files
- *  Copyright (C) 2001  Jonathan Ackerman
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
 package org.xbib.jdbc.csv;
 
-import org.xbib.io.TableReader;
+import org.xbib.jdbc.io.TableReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -235,7 +219,7 @@ public class CsvDriver implements Driver {
     public static void writeLog(String message) {
         PrintWriter logWriter = DriverManager.getLogWriter();
         if (logWriter != null) {
-            logWriter.println("CsvJdbc: " + message);
+            logWriter.println(CsvDriver.class.getPackage().getName() + ": " + message);
         }
     }
 
@@ -247,12 +231,12 @@ public class CsvDriver implements Driver {
      * @param resultSet       JDBC ResultSet to write.
      * @param out             open stream to write to.
      * @param writeHeaderLine if true, the column names are written as first line.
-     * @throws java.sql.SQLException
+     * @throws SQLException
      */
     public static void writeToCsv(ResultSet resultSet, PrintStream out, boolean writeHeaderLine)
             throws SQLException {
         String separator = DEFAULT_SEPARATOR;
-        Character quoteChar = Character.valueOf(DEFAULT_QUOTECHAR);
+        Character quoteChar = DEFAULT_QUOTECHAR;
         String quoteStyle = DEFAULT_QUOTE_STYLE;
 
         if (resultSet instanceof CsvResultSet) {
@@ -294,7 +278,7 @@ public class CsvDriver implements Driver {
                 String value = resultSet.getString(i);
                 if (value != null) {
                     if (quoteChar != null) {
-                        value = addQuotes(value, separator, quoteChar.charValue(), quoteStyle);
+                        value = addQuotes(value, separator, quoteChar, quoteStyle);
                     }
                     out.print(value);
                 }
@@ -330,7 +314,7 @@ public class CsvDriver implements Driver {
 		/*
 		 * Surround value with quotes if it contains any special characters.
 		 */
-        if (value.indexOf(separator) >= 0 || value.indexOf(quoteChar) >= 0 ||
+        if (value.contains(separator) || value.indexOf(quoteChar) >= 0 ||
                 value.indexOf('\r') >= 0 || value.indexOf('\n') >= 0) {
             value = quoteChar + value + quoteChar;
         }

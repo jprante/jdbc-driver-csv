@@ -1,21 +1,6 @@
-/*
- *  CsvJdbc - a JDBC driver for CSV files
- *  Copyright (C) 2001  Jonathan Ackerman
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
 package org.xbib.jdbc.csv;
 
-import org.xbib.io.ListDataReader;
+import org.xbib.jdbc.io.ListDataReader;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -1069,13 +1054,11 @@ public class CsvDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public ResultSet getClientInfoProperties() throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -1083,45 +1066,38 @@ public class CsvDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getFunctionColumns(String catalog, String schemaPattern,
                                         String functionNamePattern, String columnNamePattern)
             throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ResultSet getFunctions(String catalog, String schemaPattern,
                                   String functionNamePattern) throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ResultSet getSchemas(String catalog, String schemaPattern)
             throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean isWrapperFor(Class<?> arg0) throws SQLException {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public <T> T unwrap(Class<T> arg0) throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public RowIdLifetime getRowIdLifetime() throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -1136,7 +1112,6 @@ public class CsvDatabaseMetaData implements DatabaseMetaData {
         String columnNames = "TABLE_CAT,TABLE_SCHEM,TABLE_NAME,COLUMN_NAME,DATA_TYPE,COLUMN_SIZE,DECIMAL_DIGITS,NUM_PREC_RADIX,COLUMN_USAGE,REMARKS,CHAR_OCTET_LENGTH,IS_NULLABLE";
         String columnTypes = "String,String,String,String,Integer,Integer,Integer,Integer,String,String,Integer,String";
         ArrayList<Object[]> columnValues = new ArrayList<Object[]>();
-        ResultSet retval = createResultSet(columnNames, columnTypes, columnValues);
-        return retval;
+        return createResultSet(columnNames, columnTypes, columnValues);
     }
 }

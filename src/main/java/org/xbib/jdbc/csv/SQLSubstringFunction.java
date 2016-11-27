@@ -5,8 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ */
 class SQLSubstringFunction extends Expression {
-    private static final Integer MAX_LENGTH = Integer.valueOf(Integer.MAX_VALUE);
+    private static final Integer MAX_LENGTH = Integer.MAX_VALUE;
 
     Expression expr;
     Expression startIndex;

@@ -1,21 +1,3 @@
-/**
- *  CsvJdbc - a JDBC driver for CSV files
- *  Copyright (C) 2008  Mario Frasca
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
 package org.xbib.jdbc.csv;
 
 import java.math.BigDecimal;
@@ -29,6 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *
+ */
 class BinaryOperation extends Expression {
     private static final long MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
     String operation;
@@ -56,7 +41,7 @@ class BinaryOperation extends Expression {
             boolean isLongExpression = false;
 
             if (leftEval instanceof Short) {
-                leftInt = Integer.valueOf(((Short) leftEval).intValue());
+                leftInt = ((Short) leftEval).intValue();
                 bil = new BigInteger(leftInt.toString());
             } else if (leftEval instanceof Long) {
                 bil = new BigInteger(leftEval.toString());
@@ -68,7 +53,7 @@ class BinaryOperation extends Expression {
             Integer rightInt;
             BigInteger bir;
             if (rightEval instanceof Short) {
-                rightInt = Integer.valueOf(((Short) rightEval).intValue());
+                rightInt = ((Short) rightEval).intValue();
                 bir = new BigInteger(rightInt.toString());
             } else if (rightEval instanceof Long) {
                 bir = new BigInteger(rightEval.toString());
@@ -94,6 +79,7 @@ class BinaryOperation extends Expression {
                 return new Integer(bil.toString());
             }
         } catch (ClassCastException e) {
+            //
         } catch (ArithmeticException e) {
             /* probably a divide by zero */
             throw new SQLException(e.getMessage());
@@ -121,6 +107,7 @@ class BinaryOperation extends Expression {
                 return new Double(bdl.remainder(bdr, mc).toString());
             }
         } catch (ClassCastException e) {
+            //
         } catch (ArithmeticException e) {
 			/* probably a divide by zero */
             throw new SQLException(e.getMessage());
@@ -137,13 +124,11 @@ class BinaryOperation extends Expression {
                 } else {
                     Long rightLong;
                     if (rightEval instanceof Short) {
-                        rightLong = Long.valueOf(((Short) rightEval).longValue());
-                    } else if (rightEval instanceof Long) {
-                        rightLong = (Long) rightEval;
+                        rightLong = ((Short) rightEval).longValue();
                     } else {
-                        rightLong = Long.valueOf(((Integer) rightEval).intValue());
+                        rightLong = (Long) rightEval;
                     }
-                    return incrementDate(leftD, rightLong.longValue());
+                    return incrementDate(leftD, rightLong);
                 }
             } else if (op == '+' && rightEval instanceof Date) {
                 Date rightD = (Date) rightEval;
@@ -155,13 +140,11 @@ class BinaryOperation extends Expression {
                 } else {
                     Long leftLong;
                     if (leftEval instanceof Short) {
-                        leftLong = Long.valueOf(((Short) leftEval).intValue());
-                    } else if (leftEval instanceof Long) {
-                        leftLong = (Long) rightEval;
+                        leftLong = (Long) leftEval;
                     } else {
-                        leftLong = Long.valueOf(((Integer) leftEval).intValue());
+                        leftLong = (Long) leftEval;
                     }
-                    return incrementDate(rightD, leftLong.longValue());
+                    return incrementDate(rightD, leftLong);
                 }
             } else if (op == '-' && leftEval instanceof Date && rightEval instanceof Long) {
                 return incrementDate((Date) leftEval, -((Long) rightEval).longValue());
@@ -237,14 +220,12 @@ class BinaryOperation extends Expression {
     }
 
     public boolean isValid() {
-		/*
+        /*
 		 * An operation containing a logical expression such as (A > 5) + 1
 		 * is not allowed in SQL.
 		 */
-        if (left instanceof LogicalExpression || right instanceof LogicalExpression) {
-            return false;
-        } else {
-            return (left.isValid() && right.isValid());
-        }
+        return !(left instanceof LogicalExpression ||
+                right instanceof LogicalExpression) &&
+                (left.isValid() && right.isValid());
     }
 }

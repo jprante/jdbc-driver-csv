@@ -1,19 +1,3 @@
-/*
- *  CsvJdbc - a JDBC driver for CSV files
- *  Copyright (C) 2013  Simon Chenery
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
 package org.xbib.jdbc.csv;
 
 import java.io.BufferedReader;
@@ -27,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 /**
- * Main class for CsvJdbc, so user can easily experiment with SQL statements in a terminal window.
+ * Main class, so user can easily experiment with SQL statements in a terminal window.
  */
 public class CsvMain {
     public static void main(String[] args) {
@@ -44,11 +28,8 @@ public class CsvMain {
 				 * Read directory and properties from a Properties file.
 				 */
                 properties = new Properties();
-                Reader propertiesReader = new FileReader(args[argIndex + 1]);
-                try {
+                try (Reader propertiesReader = new FileReader(args[argIndex + 1])) {
                     properties.load(propertiesReader);
-                } finally {
-                    propertiesReader.close();
                 }
                 argIndex += 2;
             } else if (argIndex < args.length && args[argIndex].equals("-h")) {
@@ -62,7 +43,6 @@ public class CsvMain {
 
                 argIndex = args.length;
             }
-
             if (argIndex < args.length) {
 				/*
 				 * Connect using URL containing directory name and properties.

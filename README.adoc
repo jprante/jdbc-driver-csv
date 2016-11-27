@@ -1,8 +1,13 @@
 # JDBC driver for CSV
 
-[Follow me on twitter](https://twitter.com/xbib)
+image:https://api.travis-ci.org/jprante/jdbc-driver-csv.svg[title="Build status", link="https://travis-ci.org/jprante/jdbc-driver-csv/"]
+image:https://img.shields.io/sonar/http/nemo.sonarqube.com/org.xbib.jdbc:jdbc-driver-csv/coverage.svg?style=flat-square[title="Coverage", link="https://sonarqube.com/dashboard/index?id=org.xbib.jdbc%3Ajdbc-driver-csv"]
+image:https://maven-badges.herokuapp.com/maven-central/org.xbib/jdbc-driver-csv/badge.svg[title="Maven Central", link="http://search.maven.org/#search%7Cga%7C1%7Cxbib%20jdbc-driver-csv"]
+image:https://img.shields.io/badge/License-LGPL%20v3-blue.svg[title="GPL 3.0", link="http://www.gnu.org/licenses/lgpl-3.0"]
+image:https://img.shields.io/twitter/url/https/twitter.com/xbib.svg?style=social&label=Follow%20%40xbib[title="Twitter", link="https://twitter.com/xbib"]
+image:https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif[title="PayPal", link="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GVHFQYZ9WZ8HG"]
 
-This driver is derived from the CsvJdbc project http://csvjdbc.sourceforge.net/
+This driver implementation is derived from the CsvJdbc project http://csvjdbc.sourceforge.net/
 
 JDBC driver for CSV is a read-only JDBC driver that uses Comma Separated Value (CSV) files
 or DBF files as database tables. It is ideal for writing data import programs
@@ -12,23 +17,6 @@ The driver enables a directory or a ZIP file containing CSV or DBF files
 to be accessed as though it were a database containing tables.
 However, as there is no real database management system behind the scenes,
 not all JDBC functionality is available.
-
-# Maven project usage
-
-    <repositories>
-        <repository>
-            <id>xbib</id>
-            <url>http://xbib.org/repository</url>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.xbib.jdbc</groupId>
-            <artifactId>jdbc-driver-csv</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-    </dependencies>
 
 # Documentation
 
