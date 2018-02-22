@@ -1,8 +1,9 @@
 
 plugins {
-    id "ca.coglinc.javacc" version "2.3.1"
-    id "org.sonarqube" version "2.2"
-    id "org.xbib.gradle.plugin.jbake" version "1.2.1"
+    id "ca.coglinc.javacc" version "2.4.0"
+    id "org.sonarqube" version "2.6.1"
+    id "io.codearte.nexus-staging" version "0.11.0"
+    //id "org.xbib.gradle.plugin.jbake" version "1.2.1"
 }
 
 printf "Host: %s\nOS: %s %s %s\nJVM: %s %s %s %s\nGroovy: %s\nGradle: %s\n" +
@@ -36,7 +37,7 @@ configurations {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    wagon 'org.apache.maven.wagon:wagon-ssh-external:2.10'
+    wagon 'org.apache.maven.wagon:wagon-ssh:3.0.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

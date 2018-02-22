@@ -7,6 +7,28 @@ image:https://img.shields.io/badge/License-LGPL%20v3-blue.svg[title="GPL 3.0", l
 image:https://img.shields.io/twitter/url/https/twitter.com/xbib.svg?style=social&label=Follow%20%40xbib[title="Twitter", link="https://twitter.com/xbib"]
 image:https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif[title="PayPal", link="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GVHFQYZ9WZ8HG"]
 
+# Usage
+
+## Gradle
+
+----
+dependencies {
+  compile "org.xbib.jdbc:jdbc-driver-csv:1.2.0"
+}
+----
+
+## Maven
+
+----
+<dependency>
+    <groupId>org.xbib.jdbc</groupId>
+    <artifactId>jdbc-driver-csv</artifactId>
+    <version>1.2.0</version>
+</dependency>
+----
+
+# Documentation
+
 This driver implementation is derived from the CsvJdbc project http://csvjdbc.sourceforge.net/
 
 JDBC driver for CSV is a read-only JDBC driver that uses Comma Separated Value (CSV) files
@@ -18,7 +40,6 @@ to be accessed as though it were a database containing tables.
 However, as there is no real database management system behind the scenes,
 not all JDBC functionality is available.
 
-# Documentation
 
 This driver accepts all types of CSV files defined by RFC 4180.
 

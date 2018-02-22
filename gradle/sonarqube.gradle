@@ -19,8 +19,7 @@ tasks.withType(Checkstyle) {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        xml.destination "${buildDir}/reports/jacoco-xml"
+        xml.enabled = true
     }
 }
 
