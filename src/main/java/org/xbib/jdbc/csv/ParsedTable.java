@@ -12,7 +12,7 @@ class ParsedTable {
     public ParsedTable(String tableName, String tableAlias) {
         this.joinType = JoinType.NONE;
         this.joinClause = null;
-        this.tableName = tableName;
+        this.tableName = tableName.replace(CsvDatabaseMetaData.SCHEMA_NAME + ".", "");
         this.tableAlias = tableAlias;
     }
 
@@ -20,7 +20,7 @@ class ParsedTable {
                        String tableName, String tableAlias) {
         this.joinType = joinType;
         this.joinClause = joinClause;
-        this.tableName = tableName;
+        this.tableName = tableName.replace(CsvDatabaseMetaData.SCHEMA_NAME + ".", "");
         this.tableAlias = tableAlias;
     }
 
