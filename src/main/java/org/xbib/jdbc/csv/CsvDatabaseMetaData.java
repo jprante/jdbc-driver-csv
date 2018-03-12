@@ -16,7 +16,7 @@ import java.util.List;
  * CsvJdbc driver.
  */
 public class CsvDatabaseMetaData implements DatabaseMetaData {
-    private static final String SCHEMA_NAME = "PUBLIC";
+    public static final String SCHEMA_NAME = "PUBLIC";
 
     private Connection createdByConnection;
     private CsvStatement internalStatement = null;
